@@ -2,10 +2,10 @@
 {
 	Properties
 	{
-		_MainTex("Texture", 2D) = "white" {}
-		PaintUv("PaintUv", VECTOR) = (0,0,0,0)
-		PaintBrushSize("BrushSize", Range(0.001,0.1)) = 0.1
-		PaintBrushColour("PaintBrushColour", Color) = (0,0,1,1)
+		_MainTex("Dirt Texture", 2D) = "white" {}
+		_CleanTex("Clean Texture", 2D) = "white" {}
+		[HideInInspector] PaintUv("PaintUv", VECTOR) = (0,0,0,0)
+		PaintBrushSize("BrushSize", VECTOR) = (0,0,0,0)
 	}
 		SubShader
 		{
@@ -32,12 +32,10 @@
 				};
 
 				sampler2D _MainTex;
+				sampler2D _CleanTex;
 				float4 _MainTex_ST;
-				float PaintBrushSize;
+				float2 PaintBrushSize;
 				float2 PaintUv;
-				float4 PaintBrushColour;
-
-
 
 				v2f vert(appdata v)
 				{
@@ -50,8 +48,11 @@
 
 				fixed4 frag(v2f i) : SV_Target
 				{
-					if (distance(i.uv, PaintUv) < PaintBrushSize)
-						return float4(PaintBrushColour);
+					if (distance(i.uv.x, PaintUv.x) < PaintBrushSize.x
+					&& distance(i.uv.y, PaintUv.y) < PaintBrushSize.y)
+					{
+						return tex2D(_CleanTex, i.uv);
+					}
 					return tex2D(_MainTex, i.uv);
 				}
 				ENDCG
