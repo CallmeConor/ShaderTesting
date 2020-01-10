@@ -10,6 +10,12 @@ public class PaintingWithShader : MonoBehaviour
 	private RenderTexture TempRenderTarget;
 	private Material ThisMaterial;
 
+	enum BrushDir
+	{
+		Down,
+		Right
+	}
+
 	void Start()
 	{
 		Init();
@@ -24,7 +30,6 @@ public class PaintingWithShader : MonoBehaviour
 		{
 			if (ThisMaterial.mainTexture == PaintTarget)
 			{
-				Debug.Log("RETURN");
 				return;
 			}
 		}
@@ -47,23 +52,42 @@ public class PaintingWithShader : MonoBehaviour
 			ClearTexture.SetPixel(0, 0, ClearColour);
 			Graphics.Blit(ClearTexture, PaintTarget);
 			ThisMaterial.mainTexture = PaintTarget;
-
 		}
 	}
+
+	float xHelper = 0f;
+	bool helpingX = false;
 
 	// Update is called once per frame
 	void Update()
 	{
 		RaycastHit hitInfo = new RaycastHit();
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		// OnMouseDown
+
 		if (Input.GetMouseButton(0))
 		{
+			// Enable the brush
+			if(PaintShader.GetInt("PaintBrushEnabled") == 0)
+			{
+				PaintShader.SetInt("PaintBrushEnabled", 1);
+			}
+
 			if (Physics.Raycast(ray, out hitInfo))
 			{
-				PaintShader.SetVector("PaintUv", hitInfo.textureCoord);
+				if (!helpingX)
+				{
+					Debug.Log("SetX");
+					xHelper = hitInfo.textureCoord.x;
+					helpingX = true;
+				}
+				PaintShader.SetVector("PaintUv", new Vector2(xHelper, hitInfo.textureCoord.y));
 				hitInfo.collider.SendMessage("HandleClick", hitInfo, SendMessageOptions.DontRequireReceiver);
 			}
+		}
+		if(Input.GetMouseButtonUp(0) && helpingX)
+		{
+			PaintShader.SetInt("PaintBrushEnabled", 0);
+			helpingX = false;
 		}
 	}
 

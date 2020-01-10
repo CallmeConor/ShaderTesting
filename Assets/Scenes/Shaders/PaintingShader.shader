@@ -6,6 +6,7 @@
 		_CleanTex("Clean Texture", 2D) = "white" {}
 		[HideInInspector] PaintUv("PaintUv", VECTOR) = (0,0,0,0)
 		PaintBrushSize("BrushSize", VECTOR) = (0,0,0,0)
+		PaintBrushEnabled("BrushEnabled", int) = 0
 	}
 		SubShader
 		{
@@ -36,6 +37,7 @@
 				float4 _MainTex_ST;
 				float2 PaintBrushSize;
 				float2 PaintUv;
+				int PaintBrushEnabled;
 
 				v2f vert(appdata v)
 				{
@@ -48,7 +50,7 @@
 
 				fixed4 frag(v2f i) : SV_Target
 				{
-					if (distance(i.uv.x, PaintUv.x) < PaintBrushSize.x
+					if ((PaintBrushEnabled == 1) && distance(i.uv.x, PaintUv.x) < PaintBrushSize.x
 					&& distance(i.uv.y, PaintUv.y) < PaintBrushSize.y)
 					{
 						return tex2D(_CleanTex, i.uv);
